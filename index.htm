@@ -7,9 +7,10 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="js/colpick.css">
     <link rel="icon" type="image/png" href="images/icon.png">
-    <link href='http://fonts.googleapis.com/css?family=Oswald:700' rel='stylesheet' type='text/css'>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r68/three.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+    <link href='https://fonts.googleapis.com/css?family=Oswald:700' rel='stylesheet' type='text/css'>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r68/three.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script>
         (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
         (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -39,7 +40,8 @@
 
         <div class="padding underline">
             <select id="mcversion">
-                <option value="1.11">Minecraft 1.11 and above</option>
+				<option value="1.13">Minecraft 1.13 and above</option>
+                <option value="1.11">Minecraft 1.11 &amp; 1.12</option>
                 <option value="1.9">Minecraft 1.9 &amp; 1.10</option>
                 <option value="1.8">Minecraft 1.8</option>
             </select>
@@ -54,6 +56,9 @@
             <label><input type="checkbox" name="showarms">Show Arms</label><br>
             <label><input type="checkbox" name="small">Small</label><br>
             <label><input type="checkbox" name="marker">Marker</label><br>
+			<div id="centercorrected">
+				<label><input type="checkbox" id="center-corrected" name="center-corrected">Center-corrected</label><br>
+			</div>
         </div>
 
         <div class="padding underline">
@@ -110,7 +115,7 @@
                 </table>
             </div>
         </div>
-        
+
         <div class="padding underline">
             <label><input type="checkbox" name="useequipment">Enable equipment</label><br>
             <div id="customequipment">
@@ -153,6 +158,7 @@
 
                 <input type="text" class="equipment" name="equipHelmet" placeholder="Helmet" list="list-helmet">
                 <datalist id="list-helmet">
+                    <option value="turtle_helmet">
                     <option value="chainmail_helmet">
                     <option value="diamond_helmet">
                     <option value="golden_helmet">
@@ -173,15 +179,45 @@
                     <br>
                     You can find lots of different heads here. Pick one and copy the <i>Give-Code</i> into the helmet field:
                     <br>
-                    <a href="http://minecraft-heads.com/" target="_blank"><img src="http://minecraft-heads.com/images/banners/minecraft-heads_halfbanner_234x60.png" alt="minecraft-heads.com" /></a>
+                    <a href="http://minecraft-heads.com/" target="_blank"><img src="images/mc-heads.png" alt="minecraft-heads.com" /></a>
                 </div>
             </div>
         </div>
 
         <div class="padding underline">
             <input type="text" name="customname" id="customname" placeholder="Custom name">
-            <label><input type="checkbox" name="showcustomname">Show custom name</label>
-            <br>
+            <label><input type="checkbox" name="showcustomname">Show custom name</label><br>
+			<div id="namecustomization">
+				<p>
+					In 1.13, you can now add formats to the name tags.
+					Enter the color id (for example red, dark_blue) in the name color field to give it a color.
+				</p>
+				<input type="text" name="namecolor" id="namecolor" placeholder="Name color" list="list-colors">
+				<datalist id="list-colors">
+					<option value="aqua">
+					<option value="black">
+					<option value="blue">
+					<option value="dark_aqua">
+					<option value="dark_blue">
+					<option value="dark_gray">
+					<option value="dark_green">
+					<option value="dark_purple">
+					<option value="dark_red">
+					<option value="gold">
+					<option value="gray">
+					<option value="green">
+					<option value="light_purple">
+					<option value="red">
+					<option value="white">
+					<option value="yellow">
+				</datalist>
+				<div>
+					<label><input type="checkbox" id="namebold" name="namebold">Bold</label>
+					<label><input type="checkbox" id="nameitalic" name="nameitalic">Italic</label>
+					<label><input type="checkbox" id="nameobfuscated" name="nameobfuscated">Obfuscated</label>
+					<label><input type="checkbox" id="namestrikethrough" name="namestrikethrough">Strikethrough</label>
+				</div>
+			</div>
         </div>
 
         <div class="padding">
@@ -239,14 +275,14 @@
     <div class="right card">
         <span style="cursor: pointer;" onclick="javascript:$('#getcommandblock').slideToggle();">
             + Obtain a command block
-        </span>
+        </span>	
         <br>
         <div id="getcommandblock">
             <div class="padding">
-                If your command is longer than 100 characters, it needs to be executed with a <b>command block</b>. Obtain one by typing:
+                If your command is longer than 256 characters (100 before Minecraft 1.11), it needs to be executed with a <i>command block</i>. Obtain one by typing:
             </div>
             <div class="code">
-                /give @p command_block
+                /give @p minecraft:command_block
             </div>
         </div>
     </div>
