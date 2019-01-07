@@ -75,6 +75,9 @@
             <label><input type="checkbox" name="showarms">Show Arms</label><br>
             <label><input type="checkbox" name="small">Small</label><br>
             <label><input type="checkbox" name="marker">Marker</label><br>
+			<div id="centercorrected">
+			<label><input type="checkbox" name="center-corrected">Center-Corrected</label><br>
+			</div>
         </div>
 
         <div class="padding underline">
@@ -204,6 +207,16 @@
             <input type="text" name="customname" id="customname" placeholder="Custom name">
             <label><input type="checkbox" name="showcustomname">Show custom name</label>
             <br>
+			<div id="namecustomization">
+				<div class="padding">
+				In 1.13, you can now add formats to the name tags. Enter the color id (for example red, dark_blue) in the name color field to give it a color.
+				</div>
+				<input type="text" name="namecolor" id="customname" placeholder="Name Color"><br>
+				<label><input type="checkbox" name="namebold">Bold</label>
+				<label><input type="checkbox" name="nameitalic">Italic</label>
+				<label><input type="checkbox" name="nameobfuscated">Obfuscated</label>
+				<label><input type="checkbox" name="namestrikethrough">Strikethrough</label>
+			</div>
         </div>
 
         <div class="padding">
