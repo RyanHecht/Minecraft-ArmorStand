@@ -26,13 +26,19 @@ var mLegRight; //*
 var mArmLeft; //*
 var mArmRight; //*
 var armorstand, armorstandWrapper; //Group all the other elements
-var xPos = "~"
-var yPos = "~"
-var zPos = "~"
+
 
 //DATA -> Stuff that we'll use to generate the command. Fetched from the controls.
 
 var mcVersion;
+
+var justgivehead = false;
+var skullMode;
+
+var selectorInput = "";
+
+var headType = "";
+
 
 var invisible = false;
 var invulnerable = false;
@@ -43,6 +49,11 @@ var showArms = false;
 var small = false;
 var marker = false;
 var centercorrected = false;
+
+var xcoord = "";
+var ycoord = "";
+var zcoord = "";
+
 
 var useEquipment;
 var equipHandRight;
@@ -134,7 +145,7 @@ $(document).ready(function(){
 	$("input").on("input", function(){
 		handleInput();
 	});
-	$(':checkbox, #equipCustomHeadMode, #equipmode, #mcversion').change(function() {
+	$(':checkbox, #equipCustomHeadMode, #skullMode, #equipmode, #mcversion').change(function() {
     	handleInput();
 	});
 
@@ -314,7 +325,9 @@ function setup(){
 function handleInput(){
 
 	mcVersion = $("#mcversion").val();
-
+	
+	justgivehead = getCheckBoxInput("justgivehead");
+	
 	invisible = getCheckBoxInput("invisible");
 	invulnerable = getCheckBoxInput("invulnerable");
     persistencerequired = getCheckBoxInput("persistencerequired");
@@ -332,7 +345,15 @@ function handleInput(){
 	equipLeggings = getInput("equipLeggings");
 	equipChestplate = getInput("equipChestplate");
 	equipHelmet = getInput("equipHelmet");
+	headType = getInput("skullInput");
+	selectorInput = getInput("selectorInput");
 	equipCustomHeadMode = $("#equipCustomHeadMode").val();
+	skullMode = $("#skullMode").val();
+	
+	//Positioning
+	xcoord = getInput("x-coord");
+	ycoord = getInput("y-coord");
+	zcoord = getInput("z-coord");
 
     equipColorShoes = $("#shoecolor").css("background-color");
     equipColorLeggings = $("#leggingscolor").css("background-color");
@@ -356,21 +377,9 @@ function handleInput(){
 	rightLeg.set(getRangeInput("rightLegX"), getRangeInput("rightLegY"), getRangeInput("rightLegZ"));
 	leftArm.set(getRangeInput("leftArmX"), getRangeInput("leftArmY"), getRangeInput("leftArmZ"));
 	rightArm.set(getRangeInput("rightArmX"), getRangeInput("rightArmY"), getRangeInput("rightArmZ"));
+
 	rotation = getRangeInput("rotation");
-	xPos = getInput("x-coord");
-	yPos = getInput("y-coord");
-	zPos = getInput("z-coord");
-	console.log(xPos + "." + yPos + "." + zPos);
-	if (xPos == "") {
-		xPos = "~";
-	}
-	if (yPos == "") {
-		yPos = "~";
-	}
-	if (zPos == "") {
-		zPos = "~";
-	}
-	console.log(xPos + "." + yPos + "." + zPos);
+
 	updateUI();
 }
 function getCheckBoxInput(name){
@@ -387,7 +396,16 @@ function getInput(name){
 function updateUI(){
 
 	//Hide/Show different inputs
-
+	if(justgivehead) {
+		$("#summonAS").slideUp();
+		$("#giveSkull").slideDown();
+	}
+	else {
+		$("#summonAS").slideDown();
+		$("#giveSkull").slideUp();
+	}
+	
+	
 	if(showArms)
 		$("#inputarms").slideDown();
 	else
@@ -482,15 +500,40 @@ function updateUI(){
 }
 
 function generateCode(){
-	var code = "/summon armor_stand ~ ~ ~ {" //in 1.13, positions are no longer center-corrected. Adding .5 makes it centered. However for players it is already center-corrected
+	if(justgivehead){
+		var selector = getSelector();
+		var code = "give "+selector+" minecraft:skull 1 3 {"
+		
+	if(mcVersion == "1.8" || mcVersion == "1.9"){
+		code = "/give "+selector+" skull 1 3 {";
+	} else if (mcVersion == "1.11") {
+		code = "/give "+selector+" minecraft:skull 1 3 {";
+	} else if (mcVersion == "1.13") {
+		centercorrected ? code = "/give "+selector+" player_head {" : code = "/give "+selector+" player_head {"
+	}
+		var tags = [];
+		tags.push(getSkullItem());
+		
+		code += tags.join(",");
+		code += "}";
+		return code;
+	}
+	
+		else {
+	// Positions
+	var xpos = getxCoords();
+	var ypos = getyCoords();
+	var zpos = getzCoords();
+	//Spawn Armor Stands
+	var code = "/summon armor_stand "+xpos+" "+ypos+" "+zpos+" {" //in 1.13, positions are no longer center-corrected. Adding .5 makes it centered. However for players it is already center-corrected
 	
 	// Old entity name
 	if(mcVersion == "1.8" || mcVersion == "1.9"){
-		code = "/summon ArmorStand ~ ~ ~ {";
+		code = "/summon ArmorStand "+xpos+" "+ypos+" "+zpos+" {";
 	} else if (mcVersion == "1.11") {
-		code = "/summon armor_stand ~ ~ ~ {";
+		code = "/summon armor_stand "+xpos+" "+ypos+" "+zpos+" {";
 	} else if (mcVersion == "1.13") {
-		centercorrected ? code = "/summon armor_stand ~ ~-0.5 ~ {" : code = "/summon armor_stand ~ ~ ~ {"
+		centercorrected ? code = "/summon armor_stand ~ ~-0.5 ~ {" : code = "/summon armor_stand "+xpos+" "+ypos+" "+zpos+" {"
 	}
 
 	var tags = [];
@@ -604,6 +647,7 @@ function generateCode(){
 	code += tags.join(",");
 	code += "}";
 	return code;
+	}
 }
 
 function getHandRightItem(){
@@ -710,7 +754,99 @@ function getHeadItem(){
 		}
 
 	}
+	
+	else if(equipCustomHeadMode == "url-headonly"){
+		var uuid = generateUUID();
+		var base64Value = btoa('{textures:{SKIN:{url:"'+equipHelmet+'"}}}');
+		
+		if (mcVersion == "1.8" || mcVersion == "1.9" || mcVersion == "1.11") {
+			return 'SkullOwner:{Id:'+uuid+',Properties:{textures:[{Value:'+base64Value+'}]}}';
+		} else if (mcVersion == "1.13") {
+			return 'SkullOwner:{Id:'+uuid+',Properties:{textures:[{Value:'+base64Value+'}]}}';
+		}
+	}
 
+}
+
+function getSkullItem(){
+	if(headType == "") return "{}";
+	//Get URL
+	if(skullMode == "url-head"){
+		var uuid = generateUUID();
+		var base64Value = btoa('{textures:{SKIN:{url:"'+headType+'"}}}');
+		
+		if (mcVersion == "1.8" || mcVersion == "1.9" || mcVersion == "1.11") {
+			return 'SkullOwner:{Id:'+uuid+',Properties:{textures:[{Value:'+base64Value+'}]}}';
+		} else if (mcVersion == "1.13") {
+			return 'SkullOwner:{Id:'+uuid+',Properties:{textures:[{Value:'+base64Value+'}]}}';
+		}
+	}
+	
+	else if(skullMode == "player-name"){
+		if (mcVersion == "1.8" || mcVersion == "1.9" || mcVersion == "1.11") {
+			return "SkullOwner:\""+headType+"\"";
+		} else if (mcVersion == "1.13") {
+			return "SkullOwner:\""+headType+"\"";
+		}
+	}
+	
+	
+}
+
+function getSelector(){
+	if(selectorInput == "") return "@p";
+	
+	return selectorInput;
+}
+
+//uses X coordinate set to return
+function getxCoords() {
+	if(xcoord == "") return "~";
+	
+	return xcoord;
+}
+//uses Y coordinate set to return
+function getyCoords() {
+	if(ycoord == "") return "~";
+	
+	return ycoord;
+}
+
+//uses Z coordinate set to return
+function getzCoords() {
+	if(zcoord == "") return "~";
+	
+	return zcoord;
+}
+
+function getName() {
+	if (!customName) return ""
+	return `\\"text\\":\\"${customName}\\"`
+}
+
+function getNameColor() {
+	if (nameColor == "") return ""
+	return `,\\"color\\":\\"${nameColor}\\"`
+}
+
+function getNameBold() {
+	if (!nameBold) return ""
+	return `,\\"bold\\":\\"true\\"`
+}
+
+function getNameItalic() {
+	if (!nameItalic) return ""
+	return `,\\"italic\\":\\"true\\"`
+}
+
+function getNameStrikethrough() {
+	if (!nameStrikethrough) return ""
+	return `,\\"strikethrough\\":\\"true\\"`
+}
+
+function getNameObfuscated() {
+	if (!nameObfuscated) return ""
+	return `,\\"obfuscated\\":\\"true\\"`
 }
 
 function getName() {
